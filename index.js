@@ -1,18 +1,27 @@
-const { GoogleGenerativeAI }=require("@google/generative-ai");
-require('dotenv').config();
-const genAI = new GoogleGenerativeAI(process.env.API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const express=require("express");
+const {generateAnswers}=require("./services/googleGemini")
 
-const prompt = "Tell me about emerging technologies.";
+const app=express();
+app.use(express.json());
 
-const generateAnswers=async()=>{
+app.get("/",(req,res)=>{
+    res.json({
+        msg:"Heyy there! "
+    })
+})
+
+app.get("/api/askme",async(req,res)=>{
     try {
-        const result = await model.generateContent(prompt);
-        console.log(result.response.text());
-        
+        const {query}=req.body;
+        console.log(query);
+        const result=await generateAnswers(query);
+        res.send({
+            "result":result
+        })
+
     } catch (error) {
         console.log(error);
     }
-}
+})
 
-generateAnswers();
+app.listen(3000,()=>console.log("server is running at http://localhost:3000"))
